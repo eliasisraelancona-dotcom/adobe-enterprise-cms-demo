@@ -380,3 +380,4 @@ MIT License - See [LICENSE](../../../LICENSE) for details.
 **Built with ❤️ using Cursor AI** - *Demonstrating the future of enterprise development*
 
 > *This demo showcases how Cursor transforms complex enterprise development from days of manual work to minutes of intelligent assistance. Perfect for organizations like Adobe who need sophisticated systems built quickly and correctly.*
+Small README tweak for PR.
