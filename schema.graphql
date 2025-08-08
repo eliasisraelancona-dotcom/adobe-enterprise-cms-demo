@@ -1000,6 +1000,80 @@ input TagCreateInput {
   content: ContentRelateToManyForCreateInput
 }
 
+type Question {
+  id: ID!
+  question: String
+  answer: Question_answer_Document
+  status: QuestionStatusType
+  askedBy: User
+  askedAt: DateTime
+  answeredAt: DateTime
+}
+
+type Question_answer_Document {
+  document(hydrateRelationships: Boolean! = false): JSON!
+}
+
+enum QuestionStatusType {
+  OPEN
+  ANSWERED
+  DEFERRED
+}
+
+input QuestionWhereUniqueInput {
+  id: ID
+}
+
+input QuestionWhereInput {
+  AND: [QuestionWhereInput!]
+  OR: [QuestionWhereInput!]
+  NOT: [QuestionWhereInput!]
+  id: IDFilter
+  question: StringFilter
+  status: QuestionStatusTypeNullableFilter
+  askedBy: UserWhereInput
+  askedAt: DateTimeNullableFilter
+  answeredAt: DateTimeNullableFilter
+}
+
+input QuestionStatusTypeNullableFilter {
+  equals: QuestionStatusType
+  in: [QuestionStatusType!]
+  notIn: [QuestionStatusType!]
+  not: QuestionStatusTypeNullableFilter
+}
+
+input QuestionOrderByInput {
+  id: OrderDirection
+  question: OrderDirection
+  status: OrderDirection
+  askedAt: OrderDirection
+  answeredAt: OrderDirection
+}
+
+input QuestionUpdateInput {
+  question: String
+  answer: JSON
+  status: QuestionStatusType
+  askedBy: UserRelateToOneForUpdateInput
+  askedAt: DateTime
+  answeredAt: DateTime
+}
+
+input QuestionUpdateArgs {
+  where: QuestionWhereUniqueInput!
+  data: QuestionUpdateInput!
+}
+
+input QuestionCreateInput {
+  question: String
+  answer: JSON
+  status: QuestionStatusType
+  askedBy: UserRelateToOneForCreateInput
+  askedAt: DateTime
+  answeredAt: DateTime
+}
+
 type AnalyticsEvent {
   id: ID!
   entityType: AnalyticsEventEntityTypeType
@@ -1236,6 +1310,12 @@ type Mutation {
   updateTags(data: [TagUpdateArgs!]!): [Tag]
   deleteTag(where: TagWhereUniqueInput!): Tag
   deleteTags(where: [TagWhereUniqueInput!]!): [Tag]
+  createQuestion(data: QuestionCreateInput!): Question
+  createQuestions(data: [QuestionCreateInput!]!): [Question]
+  updateQuestion(where: QuestionWhereUniqueInput!, data: QuestionUpdateInput!): Question
+  updateQuestions(data: [QuestionUpdateArgs!]!): [Question]
+  deleteQuestion(where: QuestionWhereUniqueInput!): Question
+  deleteQuestions(where: [QuestionWhereUniqueInput!]!): [Question]
   createAnalyticsEvent(data: AnalyticsEventCreateInput!): AnalyticsEvent
   createAnalyticsEvents(data: [AnalyticsEventCreateInput!]!): [AnalyticsEvent]
   updateAnalyticsEvent(where: AnalyticsEventWhereUniqueInput!, data: AnalyticsEventUpdateInput!): AnalyticsEvent
@@ -1293,6 +1373,9 @@ type Query {
   tag(where: TagWhereUniqueInput!): Tag
   tags(where: TagWhereInput! = {}, orderBy: [TagOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TagWhereUniqueInput): [Tag!]
   tagsCount(where: TagWhereInput! = {}): Int
+  question(where: QuestionWhereUniqueInput!): Question
+  questions(where: QuestionWhereInput! = {}, orderBy: [QuestionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: QuestionWhereUniqueInput): [Question!]
+  questionsCount(where: QuestionWhereInput! = {}): Int
   analyticsEvent(where: AnalyticsEventWhereUniqueInput!): AnalyticsEvent
   analyticsEvents(where: AnalyticsEventWhereInput! = {}, orderBy: [AnalyticsEventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: AnalyticsEventWhereUniqueInput): [AnalyticsEvent!]
   analyticsEventsCount(where: AnalyticsEventWhereInput! = {}): Int

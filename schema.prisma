@@ -9,27 +9,27 @@ datasource sqlite {
 
 generator client {
   provider = "prisma-client-js"
-  output   = "node_modules/myprisma"
 }
 
 model User {
-  id                    String    @id @default(cuid())
-  name                  String    @default("")
-  email                 String    @unique @default("")
+  id                    String     @id @default(cuid())
+  name                  String     @default("")
+  email                 String     @unique @default("")
   password              String
-  department            String    @default("")
-  jobTitle              String    @default("")
-  role                  Role?     @relation("User_role", fields: [roleId], references: [id])
-  roleId                String?   @map("role")
-  manager               User?     @relation("User_manager", fields: [managerId], references: [id])
-  managerId             String?   @map("manager")
-  reports               User[]    @relation("User_manager")
-  isActive              Boolean   @default(true)
+  department            String     @default("")
+  jobTitle              String     @default("")
+  role                  Role?      @relation("User_role", fields: [roleId], references: [id])
+  roleId                String?    @map("role")
+  manager               User?      @relation("User_manager", fields: [managerId], references: [id])
+  managerId             String?    @map("manager")
+  reports               User[]     @relation("User_manager")
+  isActive              Boolean    @default(true)
   lastLogin             DateTime?
-  createdContent        Content[] @relation("Content_author")
-  uploadedAssets        Asset[]   @relation("Asset_uploadedBy")
-  createdAt             DateTime? @default(now())
-  from_Asset_approvedBy Asset[]   @relation("Asset_approvedBy")
+  createdContent        Content[]  @relation("Content_author")
+  uploadedAssets        Asset[]    @relation("Asset_uploadedBy")
+  createdAt             DateTime?  @default(now())
+  from_Asset_approvedBy Asset[]    @relation("Asset_approvedBy")
+  from_Question_askedBy Question[] @relation("Question_askedBy")
 
   @@index([name])
   @@index([roleId])
@@ -159,6 +159,19 @@ model Tag {
   description String    @default("")
   assets      Asset[]   @relation("Asset_tags")
   content     Content[] @relation("Content_tags")
+}
+
+model Question {
+  id         String    @id @default(cuid())
+  question   String    @default("")
+  answer     Json
+  status     String?   @default("OPEN")
+  askedBy    User?     @relation("Question_askedBy", fields: [askedById], references: [id])
+  askedById  String?   @map("askedBy")
+  askedAt    DateTime? @default(now())
+  answeredAt DateTime?
+
+  @@index([askedById])
 }
 
 model AnalyticsEvent {

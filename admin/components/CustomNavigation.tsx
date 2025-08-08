@@ -24,6 +24,11 @@ export function CustomNavigation({ lists }: NavigationProps) {
           Org Chart
         </NavItem>
       )
+      items.push(
+        <NavItem key="questions-triage" href="/questions-triage">
+          Questions
+        </NavItem>
+      )
     }
   }
 
