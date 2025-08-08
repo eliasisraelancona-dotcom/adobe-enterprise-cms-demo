@@ -11,7 +11,8 @@
     "postinstall": "keystone postinstall",
     "seed-data": "tsx seed-data.ts",
     "reset-db": "rm -f keystone.db && pnpm dev",
-    "deploy": "keystone build && keystone start"
+    "deploy": "keystone build && keystone start",
+    "test:backfill:questions": "tsx scripts/test-backfill-questions-classification.ts"
   },
   "dependencies": {
     "@keystone-6/auth": "^8.1.0",

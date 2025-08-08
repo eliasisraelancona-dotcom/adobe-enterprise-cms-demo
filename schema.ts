@@ -904,6 +904,68 @@ export const lists: Lists<Session> = {
   }),
 
   /**
+   * Q&A MANAGEMENT
+   * Capture audience questions and track answers/status
+   */
+  Question: list({
+    access: allowAll,
+    ui: {
+      labelField: 'question',
+      listView: {
+        initialColumns: ['question', 'status', 'askedBy', 'askedAt', 'answeredAt'],
+        initialSort: { field: 'askedAt', direction: 'DESC' },
+      },
+    },
+    fields: {
+      question: text({
+        validation: { isRequired: true },
+        ui: { displayMode: 'textarea', description: 'Audience question' },
+      }),
+
+      answer: document({
+        formatting: true,
+        links: true,
+        layouts: [[1], [1, 1]],
+        ui: { description: 'Provide an answer now or later' },
+      }),
+
+      status: select({
+        type: 'enum',
+        options: [
+          { label: 'Open', value: 'OPEN' },
+          { label: 'Answered', value: 'ANSWERED' },
+          { label: 'Deferred', value: 'DEFERRED' },
+        ],
+        defaultValue: 'OPEN',
+        ui: { displayMode: 'segmented-control' },
+      }),
+
+      askedBy: relationship({
+        ref: 'User',
+        ui: { description: 'Optional: who asked the question' },
+      }),
+
+      askedAt: timestamp({
+        defaultValue: { kind: 'now' },
+        ui: { itemView: { fieldMode: 'read' } },
+      }),
+
+      answeredAt: timestamp({
+        ui: { itemView: { fieldMode: 'read' } },
+      }),
+    },
+    hooks: {
+      resolveInput: async ({ resolvedData, item }) => {
+        // Auto-set answeredAt when status becomes ANSWERED
+        if (resolvedData.status === 'ANSWERED' && item?.status !== 'ANSWERED') {
+          return { ...resolvedData, answeredAt: new Date().toISOString() }
+        }
+        return resolvedData
+      },
+    },
+  }),
+
+  /**
    * ANALYTICS & REPORTING
    * Track usage and performance metrics
    */
