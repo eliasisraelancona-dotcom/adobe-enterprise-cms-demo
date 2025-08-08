@@ -1,0 +1,27 @@
+---
+description: Auto-attach access enforcement guidance when editing schema or access
+globs:
+  - schema.ts
+  - access.ts
+  - keystone.ts
+alwaysApply: false
+---
+
+When modifying lists or permissions:
+- Enforce rules at the backend level in `schema.ts`:
+  - Use `access` read/create/update/delete hooks with `isSignedIn`, `permissions`, and `rules` filters.
+  - Example patterns:
+    - Read: use `rules.canReadContent` / `rules.canReadAssets` for filtered access.
+    - Update/Delete: allow if elevated permission; else restrict to owned/unapproved items via rule filter.
+    - Create: gate with the relevant `permissions.canCreate...` or `permissions.canUploadAssets`.
+- Keep Admin UI behavior consistent:
+  - Mirror UI `hideCreate/hideDelete/fieldMode` to match backend access decisions.
+- Ensure session shape supports decisions:
+  - Keep `sessionData` in `keystone.ts` aligned with permission checks (role flags present).
+- Test with seed roles/users to validate coverage across roles.
+
+Reference files:
+@schema.ts
+@access.ts
+@keystone.ts
+

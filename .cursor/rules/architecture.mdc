@@ -1,0 +1,40 @@
+---
+description: Adobe Enterprise CMS – Architecture overview (Keystone 6 + TS, Prisma, stateless sessions, storage, admin UI, lists, access rules)
+globs:
+alwaysApply: true
+---
+
+- Stack
+  - Keystone 6 + TypeScript, SQLite (dev) via Prisma, Express extensions
+  - Stateless sessions, email/password auth on `User`
+  - GraphQL at `/api/graphql`; Playground in dev; introspection off in prod
+- Server and storage
+  - Static asset routes: `/assets/images|documents|videos` with security headers
+  - Health `/health`, Metrics `/metrics`
+  - Local storage configs: `images`, `documents`, `videos` with URL generators
+- Admin UI
+  - Access gated by `session.data.role.canAccessAdminUI`
+  - Custom nav: `admin/components/CustomNavigation.tsx` adds “Org Chart”
+  - Custom page: `admin/pages/org-chart.tsx` (Apollo query for `User.manager`/`reports`)
+- Data model (lists in `schema.ts`)
+  - `User`, `Role`, `Brand`, `Department`, `Asset`, `Content`, `Tag`, `AnalyticsEvent`, `AuditLog`
+  - Key relationships: self-ref `User.manager/reports`, `Content.relatedAssets`, `Asset.brand`, etc.
+  - Rich documents: `Brand.brandGuidelines`, `Content.content`
+  - Workflows: Content status (draft→published), Asset approval (pending→approved)
+  - Usage tracking: content `viewCount`, assets `downloadCount`, `lastDownloaded`
+- Access control (`access.ts`)
+  - `permissions`: boolean capabilities (content/assets/brands/users/system)
+  - `rules`: filtered reads/updates for content, assets, users, brands
+  - Note: Many lists currently have `access: allowAll`; backend enforcement can be wired via list access
+- Seed data (`seed-data.ts`)
+  - 7 roles, departments, 3 brands, 10 users (with org chart), tags, content, analytics events
+- Keystone config (`keystone.ts`)
+  - Auth/initFirstItem, server config (max upload 100MB), storage, UI gating, telemetry disabled
+
+@keystone.ts
+@schema.ts
+@access.ts
+@seed-data.ts
+@admin/components/CustomNavigation.tsx
+@admin/pages/org-chart.tsx
+
