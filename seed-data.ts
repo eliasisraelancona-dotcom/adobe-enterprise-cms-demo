@@ -688,6 +688,75 @@ async function seedData() {
       console.log(`   ✓ Created content: ${createdContent.title}`)
     }
 
+    // Create assets (metadata only; file/image uploads are optional in this demo)
+    console.log('🗂️  Creating assets...')
+    const sampleAssets = [
+      {
+        title: 'Creative Cloud Hero Banner',
+        description: 'Homepage hero banner showcasing Creative Cloud apps',
+        assetType: 'image',
+        approvalStatus: 'approved',
+        approvalNotes: 'Brand-compliant. Approved for homepage.',
+        brandName: 'Adobe Creative Cloud',
+        uploadedByEmail: 'emily.rodriguez@adobe.com',
+        tagNames: ['Creative Cloud', 'Marketing', 'Graphic Design'],
+        fileSize: 1_245_876,
+        dimensions: { width: 1920, height: 1080 },
+        approvedByEmail: 'michael.chen@adobe.com',
+        approvedAt: new Date('2024-02-01T10:00:00Z'),
+      },
+      {
+        title: 'MAX 2024 Teaser Video',
+        description: '15s teaser for Adobe MAX 2024 campaign',
+        assetType: 'video',
+        approvalStatus: 'review',
+        brandName: 'Adobe Creative Cloud',
+        uploadedByEmail: 'david.kim@adobe.com',
+        tagNames: ['MAX 2024', 'Video Production', 'Marketing'],
+        fileSize: 12_845_223,
+        dimensions: { width: 1080, height: 1080 },
+      },
+      {
+        title: 'Experience Cloud Datasheet',
+        description: 'Two-page PDF datasheet for enterprise buyers',
+        assetType: 'document',
+        approvalStatus: 'pending',
+        brandName: 'Adobe Experience Cloud',
+        uploadedByEmail: 'sarah.johnson@adobe.com',
+        tagNames: ['Marketing', 'Press Release'],
+        fileSize: 842_112,
+      },
+    ] as const
+
+    const createdAssets = [] as Array<{ id: string; title: string }>
+    for (const a of sampleAssets) {
+      const uploader = createdUsers.find(u => u.email === a.uploadedByEmail)
+      const brand = createdBrands.find(b => b.name === a.brandName)
+      const assetTags = createdTags.filter(t => a.tagNames.includes(t.name))
+
+      const data: any = {
+        title: a.title,
+        description: a.description,
+        assetType: a.assetType,
+        approvalStatus: a.approvalStatus,
+        approvalNotes: a.approvalNotes,
+        fileSize: a.fileSize,
+        dimensions: a.dimensions,
+        uploadedBy: uploader ? { connect: { id: uploader.id } } : undefined,
+        brand: brand ? { connect: { id: brand.id } } : undefined,
+        tags: { connect: assetTags.map(t => ({ id: t.id })) },
+      }
+      if (a.approvedByEmail) {
+        const approver = createdUsers.find(u => u.email === a.approvedByEmail)
+        if (approver) data.approvedBy = { connect: { id: approver.id } }
+      }
+      if (a.approvedAt) data.approvedAt = a.approvedAt
+
+      const created = await context.query.Asset.createOne({ data })
+      createdAssets.push(created)
+      console.log(`   ✓ Created asset: ${created.title}`)
+    }
+
     // Create some sample analytics entries
     console.log('📊 Creating analytics entries...')
     const analyticsData = [
@@ -716,6 +785,52 @@ async function seedData() {
     }
     console.log(`   ✓ Created ${analyticsData.length} analytics entries`)
 
+    // Create audit logs
+    console.log('🧾 Creating audit logs...')
+    const auditLogs = [
+      {
+        action: 'CREATE',
+        entityType: 'Asset',
+        entityId: 'asset:creative-cloud-hero-banner',
+        userId: createdUsers.find(u => u.email === 'emily.rodriguez@adobe.com')!.id,
+        userEmail: 'emily.rodriguez@adobe.com',
+        userRole: 'Creative Professional',
+        department: 'Creative Services',
+        changes: { title: 'Creative Cloud Hero Banner', status: 'approved' },
+        ipAddress: '10.10.0.21',
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X)',
+      },
+      {
+        action: 'APPROVE',
+        entityType: 'Asset',
+        entityId: 'asset:creative-cloud-hero-banner',
+        userId: createdUsers.find(u => u.email === 'michael.chen@adobe.com')!.id,
+        userEmail: 'michael.chen@adobe.com',
+        userRole: 'Brand Manager',
+        department: 'Creative Services',
+        changes: { approvalNotes: 'Brand-compliant. Approved for homepage.' },
+        ipAddress: '10.10.0.42',
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X)',
+      },
+      {
+        action: 'PUBLISH',
+        entityType: 'Content',
+        entityId: 'content:ai-powered-photoshop-2024',
+        userId: createdUsers.find(u => u.email === 'sarah.johnson@adobe.com')!.id,
+        userEmail: 'sarah.johnson@adobe.com',
+        userRole: 'Content Manager',
+        department: 'Marketing',
+        changes: { status: 'published' },
+        ipAddress: '10.10.0.11',
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X)',
+      },
+    ]
+
+    for (const log of auditLogs) {
+      await context.query.AuditLog.createOne({ data: { ...log, timestamp: new Date() } })
+    }
+    console.log(`   ✓ Created ${auditLogs.length} audit log entries`)
+
     console.log('\n🎉 Seed data creation completed successfully!')
     console.log('\n📋 Summary:')
     console.log(`   • ${createdDepartments.length} departments`)
@@ -724,7 +839,9 @@ async function seedData() {
     console.log(`   • ${createdUsers.length} users`)
     console.log(`   • ${createdTags.length} tags`)
     console.log(`   • ${contentItems.length} content items`)
+    console.log(`   • ${createdAssets.length} assets`)
     console.log(`   • ${analyticsData.length} analytics entries`)
+    console.log(`   • ${auditLogs.length} audit log entries`)
     
     console.log('\n🔐 Demo Login Credentials:')
     console.log('   Admin (TAM): eliasisrael@adobe.com / 12345678')
